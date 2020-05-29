@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace JASShortCircuitExample
 {
-    public class DataAccessLayer
+    public class DataAccessLayer : IDataAccessLayer
     {
         public async Task<bool> SqlPostAsync(string procName, string conStr, string jsonBody)
         {

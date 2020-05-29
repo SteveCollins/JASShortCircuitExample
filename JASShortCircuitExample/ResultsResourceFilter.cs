@@ -14,11 +14,13 @@ namespace JASShortCircuitExample
     public class ResultsResourceFilter : Attribute, IAsyncResourceFilter
     {
         private readonly IConfiguration _config;
+        private readonly IDataAccessLayer _dal;
         private readonly string proc;
 
-        public ResultsResourceFilter(IConfiguration configuration, object procName)
+        public ResultsResourceFilter(IConfiguration configuration, IDataAccessLayer dataAccessLayer, object procName)
         {
             _config = configuration;
+            _dal = dataAccessLayer;
             proc = procName.ToString();
         }
 
@@ -30,33 +32,12 @@ namespace JASShortCircuitExample
             {
                 var body = await reader.ReadToEndAsync();
 
-                if (request.Method == "POST")
-                {
-                    var dal = new DataAccessLayer();
-                    var queryResult = await dal.SqlPostAsync(proc, _config.GetConnectionString("JsonAutoServiceExample"), body);
-                    if (queryResult)
-                    {
-                        context.Result = new ContentResult
-                        {
-                            ContentType = "application/json",
-                            StatusCode = StatusCodes.Status201Created
-                        };
-                    }
-                    else
-                    {
-                        context.Result = new ContentResult
-                        {
-                            StatusCode = StatusCodes.Status400BadRequest
-                        };
-                    };
-                }
+                var queryResult = await _dal.SqlPostAsync(proc, _config.GetConnectionString("JsonAutoServiceExample"), body);
+                if (queryResult)
+                    context.Result = new OkResult();
                 else
-                {
-                    context.Result = new ContentResult
-                    {
-                        StatusCode = StatusCodes.Status405MethodNotAllowed
-                    };
-                }
+                    context.Result = new BadRequestResult();
+                    //await next();
             }
         }
     }

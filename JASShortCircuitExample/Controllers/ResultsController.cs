@@ -14,8 +14,6 @@ namespace JASShortCircuitExample.Controllers
         // POST: api/Results
         [HttpPost]
         [TypeFilter(typeof(ResultsResourceFilter), Arguments = new object[] { "jas.api_product_post" })]
-        public void Post()
-        {
-        }
+        public void Post() {}
     }
 }
